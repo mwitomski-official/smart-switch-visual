@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Switch - Sterowanie krzyżowe LED</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .solution-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin: 40px 0;
+        }
+        
+        .before-after {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid #e74c3c;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .after {
+            border-left-color: #27ae60;
+        }
+        
+        .room-diagram {
+            background: #fff;
+            border: 3px dashed #3498db;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+            position: relative;
+            min-height: 300px;
+        }
+        
+        .room-title {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: #3498db;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        .switch {
+            width: 60px;
+            height: 40px;
+            background: #34495e;
+            border-radius: 8px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 10px;
+            display: inline-block;
+        }
+        
+        .switch.smart {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            animation: glow 2s infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
+            to { box-shadow: 0 5px 25px rgba(102, 126, 234, 0.8); }
+        }
+        
+        .switch::after {
+            content: '';
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+            transition: all 0.3s ease;
+        }
+        
+        .switch.on::after {
+            left: 30px;
+            background: #27ae60;
+        }
+        
+        .led-strip {
+            width: 200px;
+            height: 20px;
+            background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcf7f, #4d96ff, #9775fa);
+            border-radius: 10px;
+            margin: 20px auto;
+            opacity: 0.3;
+            transition: all 0.5s ease;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
+        }
+        
+        .led-strip.active {
+            opacity: 1;
+            box-shadow: 0 0 30px rgba(255, 107, 107, 0.8);
+            animation: ledGlow 1s infinite alternate;
+        }
+        
+        @keyframes ledGlow {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+        
+        .phone {
+            width: 80px;
+            height: 140px;
+            background: #2c3e50;
+            border-radius: 15px;
+            position: relative;
+            margin: 20px auto;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .phone-screen {
+            width: 60px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 8px;
+            margin: 20px auto 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .app-icon {
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 4px;
+            margin: 5px;
+            opacity: 0.9;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        .steps {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+        
+        .step {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .step:hover {
+            transform: translateX(10px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .step-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 20px;
+            flex-shrink: 0;
+        }
+        
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .product-card:hover {
+            border-color: #667eea;
+            transform: translateY(-5px);
+        }
+        
+        .product-image {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+            margin: 0 auto 15px;
+        }
+        
+        .price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #27ae60;
+            margin: 10px 0;
+        }
+        
+        .demo-controls {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+        
+        .demo-button {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .demo-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        @media (max-width: 768px) {
+            .solution-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .container {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏠 Smart Switch - Sterowanie Krzyżowe LED</h1>
+        
+        <div class="solution-grid">
+            <div class="before-after">
+                <h3>❌ PRZED - Problem</h3>
+                <div class="room-diagram">
+                    <div class="room-title">OBECNY UKŁAD</div>
+                    <div style="text-align: center; margin-top: 40px;">
+                        <h4>Salon</h4>
+                        <div class="switch" id="switch1"></div>
+                        <span style="font-size: 0.8rem;">Włącznik 1</span>
+                        
+                        <div style="margin: 30px 0;">
+                            <div class="led-strip" id="led1"></div>
+                            <div style="font-size: 0.9rem; margin-top: 10px;">LEDy pod szafką</div>
+                        </div>
+                        
+                        <h4>Pod szafką</h4>
+                        <div class="switch" id="switch2"></div>
+                        <span style="font-size: 0.8rem;">Włącznik 2</span>
+                    </div>
+                </div>
+                <p><strong>Problem:</strong> Każdy włącznik działa niezależnie. Nie ma sterowania krzyżowego.</p>
+            </div>
+            
+            <div class="before-after after">
+                <h3>✅ PO - Rozwiązanie</h3>
+                <div class="room-diagram">
+                    <div class="demo-controls">
+                     <h3>🎮 Demo sterowania</h3>
+                       <p>Kliknij przyciski, aby zobaczyć jak to działa:</p>
+                         <button class="demo-button" onclick="toggleLED('phone')">📱 Włącz z telefonu</button>
+                         <button class="demo-button" onclick="toggleLED('switch')">🎛️ Włącz fizycznie</button>
+                         <button class="demo-button" onclick="resetDemo()">🔄 Reset</button>
+                    </div>
+                    <div class="room-title">SMART SWITCH</div>
+                    <div style="text-align: center; margin-top: 40px;">
+                        <h4>Salon</h4>
+                        <div class="phone">
+                            <div class="phone-screen">
+                                <div class="app-icon"></div>
+                                <div class="app-icon"></div>
+                                <div class="app-icon"></div>
+                            </div>
+                        </div>
+                        <span style="font-size: 0.8rem;">Aplikacja telefon</span>
+                        
+                        <div style="margin: 30px 0;">
+                            <div class="led-strip active" id="led2"></div>
+                            <div style="font-size: 0.9rem; margin-top: 10px;">LEDy pod szafką</div>
+                        </div>
+                        
+                        <h4>Pod szafką</h4>
+                        <div class="switch smart on" id="smartSwitch"></div>
+                        <span style="font-size: 0.8rem;">Smart Switch</span>
+                    </div>
+                </div>
+                <p><strong>Rozwiązanie:</strong> Smart switch + sterowanie z telefonu z dowolnego miejsca!</p>
+            </div>
+        </div>
+        
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>Sterowanie z telefonu</h3>
+                <p>Włączaj i wyłączaj LED-y z dowolnego miejsca w domu przez aplikację</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Brak dodatkowych przewodów</h3>
+                <p>Wymiana tylko jednego włącznika - żadnych prac instalacyjnych</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🕐</div>
+                <h3>Harmonogramy</h3>
+                <p>Automatyczne włączanie i wyłączanie o określonych godzinach</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">🎛️</div>
+                <h3>Przyciemnianie</h3>
+                <p>Regulacja jasności LED-ów (jeśli obsługują dimming)</p>
+            </div>
+        </div>
+        
+        <div class="steps">
+            <h2>🛠️ Kroki instalacji</h2>
+            
+            <div class="step">
+                <div class="step-number">1</div>
+                <div>
+                    <h4>Wyłącz prąd</h4>
+                    <p>Wyłącz bezpiecznik obwodu z LED-ami</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">2</div>
+                <div>
+                    <h4>Zamień włącznik</h4>
+                    <p>Wymień jeden ze zwykłych włączników na smart switch (preferowane pod szafką - bliżej LED-ów)</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">3</div>
+                <div>
+                    <h4>Podłącz smart switch</h4>
+                    <p>Faza, neutral i przewód do LED-ów - zgodnie z instrukcją producenta</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">4</div>
+                <div>
+                    <h4>Konfiguracja WiFi</h4>
+                    <p>Podłącz smart switch do sieci WiFi przez aplikację mobilną</p>
+                </div>
+            </div>
+            
+            <div class="step">
+                <div class="step-number">5</div>
+                <div>
+                    <h4>Gotowe!</h4>
+                    <p>Steruj LED-ami z telefonu z dowolnego miejsca + fizyczny włącznik nadal działa</p>
+                </div>
+            </div>
+        </div>
+        
+        <h2>🛒 Polecane Smart Switch-e</h2>
+        <div class="products">
+            <div class="product-card">
+                <div class="product-image"></div>
+                <h3>Sonoff Basic R4</h3>
+                <p>Podstawowy smart switch WiFi</p>
+                <div class="price">~50 zł</div>
+                <p style="font-size: 0.9rem; color: #666;">✓ WiFi ✓ Aplikacja eWeLink</p>
+            </div>
+            
+            <div class="product-card">
+                <div class="product-image"></div>
+                <h3>Shelly 1</h3>
+                <p>Kompaktowy moduł WiFi</p>
+                <div class="price">~60 zł</div>
+                <p style="font-size: 0.9rem; color: #666;">✓ WiFi ✓ Aplikacja Shelly</p>
+            </div>
+            
+            <div class="product-card">
+                <div class="product-image"></div>
+                <h3>Tuya/SmartLife</h3>
+                <p>Smart switch z aplikacją</p>
+                <div class="price">~40 zł</div>
+                <p style="font-size: 0.9rem; color: #666;">✓ WiFi ✓ Aplikacja SmartLife</p>
+            </div>
+        </div>
+        
+        <div style="background: #e8f5e8; padding: 20px; border-radius: 15px; margin: 30px 0; text-align: center;">
+            <h3 style="color: #27ae60; margin-bottom: 15px;">💡 Zalety tego rozwiązania</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; text-align: left;">
+                <div>✅ Brak prac instalacyjnych</div>
+                <div>✅ Sterowanie z dowolnego miejsca</div>
+                <div>✅ Fizyczny włącznik nadal działa</div>
+                <div>✅ Możliwość harmonogramów</div>
+                <div>✅ Niski koszt (~50 zł)</div>
+                <div>✅ Łatwa instalacja</div>
+            </div>
+        </div>
+        
+    </div>
+    
+    <script>
+        let ledState = false;
+        
+        function toggleLED(source) {
+            ledState = !ledState;
+            const led = document.getElementById('led2');
+            const smartSwitch = document.getElementById('smartSwitch');
+            
+            if (ledState) {
+                led.classList.add('active');
+                smartSwitch.classList.add('on');
+            } else {
+                led.classList.remove('active');
+                smartSwitch.classList.remove('on');
+            }
+            
+            // Animation effect
+            if (source === 'phone') {
+                const phone = document.querySelector('.phone');
+                phone.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    phone.style.transform = 'scale(1)';
+                }, 200);
+            } else {
+                smartSwitch.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    smartSwitch.style.transform = 'scale(1)';
+                }, 200);
+            }
+        }
+        
+        function resetDemo() {
+            ledState = false;
+            const led = document.getElementById('led2');
+            const smartSwitch = document.getElementById('smartSwitch');
+            led.classList.remove('active');
+            smartSwitch.classList.remove('on');
+        }
+        
+        // Demo for old switches (they don't work together)
+        document.getElementById('switch1').addEventListener('click', function() {
+            this.classList.toggle('on');
+            // LED doesn't change because switches don't work together
+        });
+        
+        document.getElementById('switch2').addEventListener('click', function() {
+            this.classList.toggle('on');
+            const led = document.getElementById('led1');
+            if (this.classList.contains('on')) {
+                led.classList.add('active');
+            } else {
+                led.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

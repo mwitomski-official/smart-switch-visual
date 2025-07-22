@@ -409,6 +409,23 @@
                         </div>
 
                         <button class="demo-button" onclick="resetDemo()">🔃 Reset Demo</button>
+
+                        <div
+                            style="margin-top: 20px; padding: 15px; background: #fff3cd; border-radius: 10px; border-left: 4px solid #ffc107;">
+                            <h5 style="margin: 0 0 10px 0; color: #856404;">ℹ️ Jak działa prawdziwe sterowanie krzyżowe:
+                            </h5>
+                            <p style="margin: 0 0 10px 0; font-size: 0.9rem; color: #856404;">
+                                <strong>WAŻNE:</strong> Pozycja fizycznych włączników (ON/OFF) NIE odzwierciedla stanu
+                                LED-ów!
+                            </p>
+                            <div style="font-size: 0.85rem; color: #856404; line-height: 1.4;">
+                                <strong>Przykład:</strong><br>
+                                1. Salon: włącznik na OFF → klikam → LED-y SIĘ ZAPALAJĄ, włącznik na ON<br>
+                                2. Szafka: włącznik na OFF → klikam → LED-y GASNĄ, włącznik na ON<br>
+                                3. Salon: włącznik na ON → klikam → LED-y SIĘ ZAPALAJĄ, włącznik na OFF<br><br>
+                                <strong>Sonoff "pamięta" tylko stan LED-ów, nie pozycje włączników!</strong>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -573,7 +590,7 @@
         // Toggle LED from any source (true cross-control)
         function toggleLED() {
             ledState = !ledState;
-            updateUI();
+            updateLEDDisplay();
         }
 
         function toggleFromSwitch(switchNumber) {

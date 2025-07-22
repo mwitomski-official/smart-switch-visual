@@ -566,6 +566,8 @@
 
     <script>
         let ledState = false;
+        let switch1Position = false; // Physical position of switch 1
+        let switch2Position = false; // Physical position of switch 2
         let energyUsage = 0;
 
         // Toggle LED from any source (true cross-control)
@@ -575,7 +577,16 @@
         }
 
         function toggleFromSwitch(switchNumber) {
+            // Change physical switch position
+            if (switchNumber === 1) {
+                switch1Position = !switch1Position;
+            } else {
+                switch2Position = !switch2Position;
+            }
+
+            // Toggle LED regardless of switch positions
             toggleLED();
+            updateSwitchesDisplay();
 
             // Visual feedback for the pressed switch
             const switch1 = document.getElementById('demoSwitch1');
@@ -595,6 +606,7 @@
         }
 
         function toggleFromPhone() {
+            // Phone only toggles LED, doesn't change physical switches
             toggleLED();
 
             // Visual feedback for phone
@@ -605,32 +617,47 @@
             }, 200);
         }
 
-        function updateUI() {
+        function updateLEDDisplay() {
             const led = document.getElementById('demoLED');
             const status = document.getElementById('ledStatus');
-            const switch1 = document.getElementById('demoSwitch1');
-            const switch2 = document.getElementById('demoSwitch2');
 
             if (ledState) {
                 led.classList.add('active');
                 status.textContent = 'LED-y WŁĄCZONE ✨';
                 status.style.color = '#27ae60';
-                switch1.classList.add('on');
-                switch2.classList.add('on');
                 energyUsage += 0.1;
             } else {
                 led.classList.remove('active');
                 status.textContent = 'LED-y WYŁĄCZONE';
                 status.style.color = '#e74c3c';
+            }
+        }
+
+        function updateSwitchesDisplay() {
+            const switch1 = document.getElementById('demoSwitch1');
+            const switch2 = document.getElementById('demoSwitch2');
+
+            // Update switch visual positions (independent of LED state!)
+            if (switch1Position) {
+                switch1.classList.add('on');
+            } else {
                 switch1.classList.remove('on');
+            }
+
+            if (switch2Position) {
+                switch2.classList.add('on');
+            } else {
                 switch2.classList.remove('on');
             }
         }
 
         function resetDemo() {
             ledState = false;
+            switch1Position = false;
+            switch2Position = false;
             energyUsage = 0;
-            updateUI();
+            updateLEDDisplay();
+            updateSwitchesDisplay();
         }
 
         // Demo for old switches (they don't work together) - for comparison
@@ -651,7 +678,8 @@
 
         // Initialize demo switches visual state
         function initDemo() {
-            updateUI();
+            updateLEDDisplay();
+            updateSwitchesDisplay();
         }
 
         // Run init when page loads
